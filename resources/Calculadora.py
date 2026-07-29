@@ -1,16 +1,19 @@
 from use_cases.UiAutomationClass import UiAutomationClass
+from utils.serial_killer import kill_program_by_name
 
 class Calculadora(UiAutomationClass):
     """Automação da calculadora do Windows usando uiautomation."""
 
-    def __init__(self, name_of_process: str = None):
-        super().__init__(process_id="0000001", process_type="create_report", process_machine="COOP_MACHINE_01", apps_needed_for_process=["calculadora"])
-        self.name_of_process = name_of_process
+    def __init__(self, process_id: str, process_type: str, process_machine: str, apps_needed_for_process: list[str]):
+        super().__init__(process_id=process_id, 
+                         process_type=process_type, 
+                         process_machine=process_machine, 
+                         apps_needed_for_process=apps_needed_for_process)
 
     def sum_1_1(self) -> None:
         """Realiza a soma 1 + 1 na calculadora do Windows.
 
-        :returns: None.
+        :return: None.
         """
         self.window_calculadora = self.find_element(element_type="Window", params={"name": "Calculadora"})
         button_1 = self.find_element(element_type="Button", params={"name": "Um"})
@@ -27,7 +30,7 @@ class Calculadora(UiAutomationClass):
 
         :param multiply_valor: Valor a ser multiplicado pelo dólar.
         :param dolar_value: Cotação do dólar a ser usada na operação.
-        :returns: Texto exibido no resultado da calculadora após a operação.
+        :return: Texto exibido no resultado da calculadora após a operação.
         """
         self.window_calculadora = self.find_element(element_type="Window", params={"name": "Calculadora"})
         text_field = self.find_element(screen=self.window_calculadora, element_type="EditText", params={"automationid": "NormalOutput"})
@@ -41,19 +44,18 @@ class Calculadora(UiAutomationClass):
         result_text = self.find_element(screen=self.window_calculadora, element_type="EditText", params={"automationid": "CalculatorResults"})
         return result_text.Name
 
-    def close(self) -> bool:
+    def close(self, process_name: str = "CalculatorApp.exe") -> bool:
         """Finaliza o programa aberto na construção.
 
-        :returns: True se o encerramento foi solicitado com sucesso.
+        :param process_name: Nome do processo a ser finalizado quando nome do processo for diferente do que está em apps_needed_for_process.
+        :return: True se o encerramento foi solicitado com sucesso.
         """
-        return self.subprocessprograms.kill_program()
+        if not process_name:
+            raise ValueError('Nenhum processo configurado para finalizar')
+        return kill_program_by_name(process_name=process_name)
 
     def __enter__(self) -> "Calculadora":
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
-
-if __name__ == "__main__":
-    with Calculadora(name_of_program="calc.exe", name_of_process="CalculatorApp.exe") as calc:
-        calc.multiply_dolar_value("5.25", "3.50")
