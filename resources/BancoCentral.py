@@ -18,23 +18,23 @@ class BancoCentral(Browser):
         :return: str(cotacao_dolar).
         """
         sleep(10)
-        cotacao = self.browser.element_response(
-            method=self.browser.by_methods["tag_name"],
+        cotacao = self.element_response(
+            method=self.by_methods["tag_name"],
             element_id="cotacao",
             message_success="Tag <cotacao> capturada com sucesso",
             message_error="Erro ao capturar a tag <cotacao>"
         )
 
-        tables = self.browser.elements_response(
-            method=self.browser.by_methods["css_selector"],
+        tables = self.elements_response(
+            method=self.by_methods["css_selector"],
             element_id=".table.light",
             message_success="Tabela .table.light capturada com sucesso",
             message_error="Erro ao capturar a tabela .table.light",
             element=cotacao
         )
 
-        spans = self.browser.elements_response(
-            method=self.browser.by_methods["tag_name"],
+        spans = self.elements_response(
+            method=self.by_methods["tag_name"],
             element_id="span",
             message_success="Spans capturados com sucesso",
             message_error="Erro ao capturar os spans",
@@ -51,8 +51,8 @@ class BancoCentral(Browser):
         
         :return: None.
         """
-        self.browser.element_response(
-            method=self.browser.BY_METHODS["id"],
+        self.element_response(
+            method=self.BY_METHODS["id"],
             element_id="button-converter-para",
             message_success="Menu de conversão aberto",
             message_error="Não foi possível abrir o menu de conversão",
@@ -64,8 +64,8 @@ class BancoCentral(Browser):
         
         :return: list(nomes_de_moedas_cotacao).
         """
-        return self.browser.elements_response(
-            method=self.browser.by_methods["css_selector"],
+        return self.elements_response(
+            method=self.by_methods["css_selector"],
             element_id="#moedaResultado1 a.dropdown-item",
             message_success="Opções de moedas capturadas com sucesso",
             message_error="Erro ao capturar as opções de moedas"
@@ -76,7 +76,7 @@ class BancoCentral(Browser):
         
         :return: list(nomes_de_moedas_cotacao).
         """
-        self.browser.get_site(url_site='https://www.bcb.gov.br/conversao/')
+        self.get_site(url_site='https://www.bcb.gov.br/conversao/')
         self._open_converter_menu()
         coin_options = self._get_coin_options()
         coins = []
@@ -116,7 +116,7 @@ class BancoCentral(Browser):
         :return: str(resultado) se chegar no limite, significa que a cotação da moeda buscada é igual a moeda anterior.
         """
         for repetition in range(num_repetitions):
-            resultado = self.browser.elements_response(method=self.browser.BY_METHODS["class_name"], 
+            resultado = self.elements_response(method=self.BY_METHODS["class_name"], 
                                                             element_id="col-12", 
                                                             message_success="ok", 
                                                             message_error="erro")
