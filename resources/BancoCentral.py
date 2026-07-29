@@ -1,15 +1,22 @@
 from time import sleep
 from use_cases.Browser import Browser
 
-class BancoCentral:
-    def __init__(self) -> None:
-        self.browser = Browser(process_id="0000003", process_type="generate_report", process_machine="COOP_MACHINE_02", headless=True)
-        self._start_google()
-
-    def _start_google(self) -> None:
-        self.browser.get_site(url_site='https://www.bcb.gov.br/')
+class BancoCentral(Browser):
+    def __init__(self, process_id: str, process_type: str, process_machine: str, headless: bool=False) -> None:
+        """Classe para interagir com o site do Banco Central buscando cotações das moedas.
+        
+        :param process_id: Id do processo.
+        :param process_type: Tipo do processo.
+        :param process_machine: Máquina que está executando o processo.
+        :param headless: Headless verdadeiro = Não abre o navegador usando UI; Headless falso = Abre o navegador usando UI.
+        """
+        super().__init__(process_id=process_id, process_type=process_type, process_machine=process_machine, headless=headless)
 
     def get_dolar(self) -> str:
+        """Função para buscar especificamente a cotação do dólar.
+        
+        :return: str(cotacao_dolar).
+        """
         sleep(10)
         cotacao = self.browser.element_response(
             method=self.browser.by_methods["tag_name"],
@@ -40,8 +47,10 @@ class BancoCentral:
         return spans[1].text
 
     def _open_converter_menu(self) -> None:
-        # self.browser.get_site(url_site='https://www.bcb.gov.br/conversao/')
-        # sleep(10)
+        """Função para abrir o conversor de moedas no site do Banco Central.
+        
+        :return: None.
+        """
         self.browser.element_response(
             method=self.browser.BY_METHODS["id"],
             element_id="button-converter-para",
@@ -51,6 +60,10 @@ class BancoCentral:
         )
 
     def _get_coin_options(self):
+        """Função para capturar as moedas disponíveis para verificar a cotação.
+        
+        :return: list(nomes_de_moedas_cotacao).
+        """
         return self.browser.elements_response(
             method=self.browser.by_methods["css_selector"],
             element_id="#moedaResultado1 a.dropdown-item",
@@ -59,6 +72,10 @@ class BancoCentral:
         )
 
     def get_all_coins(self) -> list:
+        """Função para capturar as moedas disponíveis para verificar a cotação.
+        
+        :return: list(nomes_de_moedas_cotacao).
+        """
         self.browser.get_site(url_site='https://www.bcb.gov.br/conversao/')
         self._open_converter_menu()
         coin_options = self._get_coin_options()
@@ -73,28 +90,42 @@ class BancoCentral:
         self._open_converter_menu()
         return coins
 
-    def select_coin_by_inner_html(self, coin_html: str):
+    def select_coin_by_inner_html(self, last_result: str, coin_html: str):
+        """Função para selecionar uma moeda para cotação.
+        
+        :param last_result: Último resultado obtido com a função para poder verificar se foi carregado corretamente o valor.
+        :param coin_html: Moeda para cotação a ser selecionada.
+        :return: str(result).
+        """
         self._open_converter_menu()
         coin_options = self._get_coin_options()
         for coin in coin_options:
             inner = (coin.get_attribute("innerHTML") or coin.text).strip()
             if coin_html in inner:
                 coin.click()
-                result = self._get_result_convertion()
-                return result
+                result = self._get_result_convertion(last_result=last_result)
+                if result:
+                    return result
         raise RuntimeError(f"Moeda não encontrada com base em innerHTML: {coin_html}")
 
-    def _get_result_convertion(self) -> str:
-        resultado = bancocentral.browser.elements_response(method=bancocentral.browser.BY_METHODS["class_name"], 
-                                                          element_id="col-12", 
-                                                          message_success="ok", 
-                                                          message_error="erro")
+    def _get_result_convertion(self, last_result: str, num_repetitions: int = 10) -> str:
+        """FUnção para buscar o resultado de uma cotação.
+        
+        :param last_result: Último resultado obtido com a função para poder verificar se foi carregado corretamente o valor.
+        :param num_retitions: Quantidade de tentativas para buscar o resultado verificando se foi carregado corretamente.
+        :return: str(resultado) se chegar no limite, significa que a cotação da moeda buscada é igual a moeda anterior.
+        """
+        for repetition in range(num_repetitions):
+            resultado = self.browser.elements_response(method=self.browser.BY_METHODS["class_name"], 
+                                                            element_id="col-12", 
+                                                            message_success="ok", 
+                                                            message_error="erro")
+            value_result = resultado[1].text.split(" = ")[1].split(" ")[0]
+            if last_result != '':
+                value_last_result = last_result.split(" = ")[1].split(" ")[0]
+            else:
+                value_last_result = 'diferente'
+            if last_result != resultado[1].text and value_last_result != value_result:
+                return resultado[1].text
+            sleep(1)
         return resultado[1].text
-
-if __name__ == '__main__':
-    bancocentral = BancoCentral()
-    coins = bancocentral.get_all_coins()
-    for coin in coins:
-        print(coin["name"])
-        conversao = bancocentral.select_coin_by_inner_html(coin_html=coin["name"])
-        print(f'CONVERSAO: {conversao}')
