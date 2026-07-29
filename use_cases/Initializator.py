@@ -13,16 +13,22 @@ class Initializator:
         self.process_id = process_id
         self.process_type = process_type
         self.process_machine = process_machine
-        self.printautomation = PrintAutomation(process_id=self.process_id, process_type=self.process_type, process_machine=self.process_machine)
+        self.printautomation = PrintAutomation(process_id=self.process_id, 
+                                               process_type=self.process_type, 
+                                               process_machine=self.process_machine)
 
-    def run_program(self, name_of_program: str, name_of_process: str = None,
-                    close_existing: bool = False, wait_existing: float = 0, new_cmd: bool = False) -> bool:
+    def run_program(self, 
+                    name_of_program: str, 
+                    name_of_process: str = None,
+                    close_existing: bool = False, 
+                    wait_existing: float = 0, 
+                    new_cmd: bool = False) -> bool:
         """Executa um programa no Windows.
 
         :param name_of_program: Nome do programa a ser executado (ex: 'calc.exe').
         :param name_of_process: Nome do processo real quando difere do executado — apps UWP/stub
             materializam outro processo (ex: abrir 'calc.exe' resulta em 'CalculatorApp.exe').
-            Quando informado, é usado para finalizar em close_existing e em kill_program.
+            Quando informado, é usado para finalizar instâncias em close_existing.
         :param close_existing: Se True, finaliza instâncias já em execução antes de abrir.
             Usa name_of_process quando informado, senão name_of_program.
         :param wait_existing: Tempo máximo (s) a aguardar o processo alvo aparecer antes de finalizá-lo.
