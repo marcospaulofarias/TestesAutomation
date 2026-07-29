@@ -1,9 +1,10 @@
-from use_cases.old.SubprocessPrograms import SubprocessPrograms
+from use_cases.Initializator import Initializator
+from utils.serial_killer import kill_program_by_name
 from time import sleep
 
 if __name__ == '__main__':
-    subprocessprograms = SubprocessPrograms()
+    initializator = Initializator(process_id='test', process_type='test', process_machine='local')
 
-    subprocessprograms.run_program(name_of_program='calc.exe', name_of_process='CalculatorApp.exe')
+    initializator.run_program(name_of_program='calc.exe', name_of_process='CalculatorApp.exe')
     sleep(5)
-    subprocessprograms.kill_program()
+    kill_program_by_name(process_name='CalculatorApp.exe')
