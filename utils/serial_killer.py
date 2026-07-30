@@ -24,6 +24,16 @@ def kill_program_by_name(process_name: str, timeout: float = 5, force: bool = Tr
                 proc.kill()
             psutil.wait_procs(alive, timeout=timeout)
         return True
+    except psutil.AccessDenied:
+        result_kill = subprocess.run(["taskkill", "/F", "/IM", process_name],
+                        capture_output=True,
+                        text=True,
+                        timout=10,)
+        if result_kill.return_code == 0:
+            return True
+        else:
+            logger.critical(f'O programa "{process_name}" não pôde ser finalizado. Verificar possível erro.')
+            raise RuntimeError(f'O programa "{process_name}" não pôde ser finalizado. Verificar possível erro.')
     except Exception as error_x:
         printautomation.print_error()
         logger.critical(f'O processo "{process_name}" não pôde ser finalizado\nError: {error_x}')
@@ -50,16 +60,6 @@ def kill_all(app_keys: list = None, apps_config: dict = None, process_id: str = 
         try:
             killed = kill_program_by_name(process_name=proc_name, process_id=process_id, process_type=process_type, process_machine=process_machine)
             any_killed = any_killed or bool(killed)
-        except psutil.AccessDenied:
-            result_kill = subprocess.run(["taskkill", "F", "IM", proc_name],
-                           capture_output=True,
-                           text=True,
-                           timout=10,)
-            if result_kill.return_code == 0:
-                return True
-            else:
-                logger.critical(f'O programa "{proc_name}" não pôde ser finalizado. Verificar possível erro.')
-                raise RuntimeError(f'O programa "{proc_name}" não pôde ser finalizado. Verificar possível erro.')
         except Exception:
             # já logado em kill_program_by_name
             continue
