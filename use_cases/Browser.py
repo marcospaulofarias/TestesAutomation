@@ -43,6 +43,7 @@ class Browser(UiAutomationClass):
         self.process_machine = process_machine
         self.printautomation = PrintAutomation(process_id=self.process_id, process_type=self.process_type, process_machine=self.process_machine)
         self.headless = headless
+        kill_program_by_name(process_name="msedge")
 
     def _open_browser(self) -> None:
         """Função privada para iniciar o browser edge.

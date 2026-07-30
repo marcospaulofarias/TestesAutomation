@@ -19,5 +19,12 @@
     "close_existing": true,
     "wait_existing": 5,
     "new_cmd": true
+  },
+  "edge": {
+    "name_of_program": "msedge.exe",
+    "name_of_process": null,
+    "close_existing": true,
+    "wait_existing": 5,
+    "new_cmd": true
   }
 }
